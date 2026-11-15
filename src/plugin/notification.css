@@ -1,0 +1,633 @@
+/* ======================================================================
+   S&H Software Solutions
+   Live Notification Bell - Oracle APEX Region Plugin
+   ----------------------------------------------------------------------
+   Component : Stylesheet
+   Version   : 1.0.0
+   Date      : 2026-10-22
+   Author    : S&H Software Solutions
+   License   : MIT License. This code is free and open to use, modify,
+               and redistribute, with or without attribution, for
+               personal or commercial projects.
+   ----------------------------------------------------------------------
+   Modern notification center for the navigation bar: bell, badge,
+   dropdown panel, unread / read states, empty state and animations.
+   All colours are CSS variables on .mg-noti-plugin.
+   ====================================================================== */
+
+
+/* ======================================================================
+   Plug-in wrapper + colour variables
+   ====================================================================== */
+
+.mg-noti-plugin {
+    --mg-accent: #2563eb;
+    --mg-accent-soft: #eff6ff;
+    --mg-text: #172033;
+    --mg-text-secondary: #64748b;
+    --mg-border: #e7eaf0;
+    --mg-surface: #ffffff;
+
+    position: relative;
+    display: inline-flex;
+    font-family: inherit;
+}
+
+/* Inner wrapper is only a data carrier - no layout of its own */
+.mg-noti-inner {
+    display: contents;
+}
+
+
+/* ======================================================================
+   Bell button
+   ====================================================================== */
+
+.mg-noti-bell {
+    position: relative;
+
+    width: 44px;
+    height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #e5e9f0;
+    border-radius: 14px;
+
+    background: #fff;
+    color: #334155;
+
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, .04),
+        0 4px 12px rgba(15, 23, 42, .04);
+
+    cursor: pointer;
+
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease;
+}
+
+.mg-noti-bell:hover {
+    background: #f8fafc;
+    border-color: #d7dde6;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, .09);
+}
+
+.mg-noti-bell:active {
+    transform: scale(.96);
+}
+
+.mg-noti-plugin.is-open .mg-noti-bell {
+    background: var(--mg-accent-soft);
+    border-color: #cbdcff;
+    color: var(--mg-accent);
+}
+
+.mg-noti-bell-icon {
+    font-size: 19px;
+}
+
+
+/* ======================================================================
+   Unread badge
+   ====================================================================== */
+
+.mg-noti-badge {
+    position: absolute;
+
+    top: -5px;
+    right: -5px;
+
+    min-width: 19px;
+    height: 19px;
+
+    padding: 0 5px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid #fff;
+    border-radius: 10px;
+
+    background: #ef4444;
+    color: #fff;
+
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+
+    box-shadow: 0 2px 6px rgba(239, 68, 68, .28);
+}
+
+
+/* ======================================================================
+   Bell "ring" + badge "pop" when a new notification arrives
+   ====================================================================== */
+
+.mg-noti-bell.mg-noti-ring .mg-noti-bell-icon {
+    display: inline-block;
+    transform-origin: 50% 0;
+    animation: mgNotiRing .9s ease-in-out;
+}
+
+.mg-noti-bell.mg-noti-ring .mg-noti-badge {
+    animation: mgNotiPop .35s ease-out;
+}
+
+@keyframes mgNotiRing {
+    0%, 100% { transform: rotate(0); }
+    15%      { transform: rotate(14deg); }
+    30%      { transform: rotate(-12deg); }
+    45%      { transform: rotate(9deg); }
+    60%      { transform: rotate(-6deg); }
+    75%      { transform: rotate(3deg); }
+}
+
+@keyframes mgNotiPop {
+    0%   { transform: scale(.4); }
+    70%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+
+/* ======================================================================
+   Dropdown panel
+   ----------------------------------------------------------------------
+   Opens with a swipe from the right, closes back to the right.
+   open = .5s      close = .3s
+   The JS reads the close time from .is-closing automatically.
+   ====================================================================== */
+
+.mg-noti-panel {
+    position: fixed;
+
+    width: 410px;
+    max-width: calc(100vw - 24px);
+
+    background: var(--mg-surface);
+
+    border: 1px solid rgba(15, 23, 42, .10);
+    border-radius: 18px;
+
+    box-shadow:
+        0 24px 65px rgba(15, 23, 42, .18),
+        0 5px 18px rgba(15, 23, 42, .08);
+
+    overflow: hidden;
+
+    z-index: 99999;
+
+    transform-origin: top right;
+
+    animation: mg-noti-swipe-in .5s cubic-bezier(.34, 1.4, .64, 1) both;
+}
+
+.mg-noti-panel.is-closing {
+    animation: mg-noti-swipe-out .3s cubic-bezier(.4, 0, 1, 1) both;
+    pointer-events: none;
+}
+
+/* Panel stays open during a live refresh: no replay, no flicker */
+.mg-noti-panel.no-anim {
+    animation: none;
+}
+
+@keyframes mg-noti-swipe-in {
+    0% {
+        opacity: 0;
+        transform: translateX(60px) scale(.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes mg-noti-swipe-out {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(60px) scale(.96);
+    }
+}
+
+
+/* ======================================================================
+   Panel header
+   ====================================================================== */
+
+.mg-noti-header {
+    min-height: 74px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    padding: 16px 18px;
+
+    border-bottom: 1px solid var(--mg-border);
+
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+}
+
+.mg-noti-header-main {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+.mg-noti-header-icon {
+    width: 38px;
+    height: 38px;
+
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: var(--mg-accent-soft);
+    color: var(--mg-accent);
+
+    font-size: 16px;
+}
+
+.mg-noti-header-text {
+    min-width: 0;
+}
+
+.mg-noti-title {
+    color: var(--mg-text);
+
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.mg-noti-subtitle {
+    margin-top: 2px;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+.mg-noti-header-count {
+    flex: 0 0 auto;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    background: #f1f5f9;
+    color: #475569;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* ======================================================================
+   Notification list
+   ====================================================================== */
+
+.mg-noti-list {
+    max-height: 440px;
+
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.mg-noti-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mg-noti-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mg-noti-list::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #d5dbe5;
+}
+
+
+/* ======================================================================
+   Notification item
+   ====================================================================== */
+
+.mg-noti-item {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 10px;
+
+    gap: 12px;
+
+    padding: 15px 17px;
+
+    border-bottom: 1px solid #f0f2f5;
+
+    background: #fff;
+
+    cursor: default;
+    outline: none;
+
+    transition:
+        background-color .22s ease,
+        box-shadow .22s ease;
+}
+
+.mg-noti-item:last-child {
+    border-bottom: 0;
+}
+
+/* Item icon */
+.mg-noti-item-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    align-self: start;
+
+    border-radius: 13px;
+
+    background: #f8fafc;
+    color: #64748b;
+
+    font-size: 16px;
+}
+
+/* Content */
+.mg-noti-content {
+    min-width: 0;
+}
+
+.mg-noti-item-title {
+    margin-top: 1px;
+
+    color: var(--mg-text);
+
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.35;
+}
+
+.mg-noti-message {
+    margin-top: 4px;
+
+    color: var(--mg-text-secondary);
+
+    font-size: 12.5px;
+    line-height: 1.5;
+
+    word-break: break-word;
+}
+
+.mg-noti-time {
+    margin-top: 7px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #94a3b8;
+
+    font-size: 10.5px;
+}
+
+.mg-noti-time .fa {
+    font-size: 11px;
+}
+
+/* Unread dot */
+.mg-noti-unread-dot {
+    width: 7px;
+    height: 7px;
+
+    margin-top: 7px;
+
+    border-radius: 50%;
+
+    background: var(--mg-accent);
+
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, .16);
+}
+
+
+/* ======================================================================
+   UNREAD - soft blue row, blue accent bar, solid blue icon
+   ====================================================================== */
+
+.mg-noti-item.is-unread {
+    background: #eaf2ff;
+    box-shadow: inset 4px 0 0 var(--mg-accent);
+    cursor: pointer;
+}
+
+.mg-noti-item.is-unread:hover {
+    background: #dbe9ff;
+}
+
+.mg-noti-item.is-unread .mg-noti-item-title {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.mg-noti-item.is-unread .mg-noti-message {
+    color: #334155;
+}
+
+.mg-noti-item.is-unread .mg-noti-item-icon {
+    background: var(--mg-accent);
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, .28);
+}
+
+
+/* ======================================================================
+   READ - calm, dimmed row
+   ====================================================================== */
+
+.mg-noti-item.is-read {
+    background: #ffffff;
+    box-shadow: inset 4px 0 0 transparent;
+}
+
+.mg-noti-item.is-read:hover {
+    background: #f6f8fb;
+}
+
+.mg-noti-item.is-read .mg-noti-item-title {
+    color: #475569;
+    font-weight: 600;
+}
+
+.mg-noti-item.is-read .mg-noti-message {
+    color: #7b8798;
+}
+
+.mg-noti-item.is-read .mg-noti-item-icon {
+    background: #f1f5f9;
+    color: #94a3b8;
+    box-shadow: none;
+}
+
+
+/* ======================================================================
+   Empty state ("You're all caught up!")
+   ====================================================================== */
+
+.mg-noti-empty {
+    min-height: 250px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 32px 22px;
+
+    text-align: center;
+}
+
+.mg-noti-empty-icon {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 15px;
+
+    border-radius: 16px;
+
+    background: #ecfdf5;
+    color: #059669;
+
+    font-size: 20px;
+}
+
+.mg-noti-empty-title {
+    color: var(--mg-text);
+
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.mg-noti-empty-text {
+    margin-top: 5px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* ======================================================================
+   Footer ("Mark all as read")
+   ====================================================================== */
+
+.mg-noti-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 16px;
+
+    border-top: 1px solid var(--mg-border);
+
+    background: #fbfcfe;
+}
+
+.mg-noti-mark-all {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 7px 10px;
+
+    border: 0;
+    border-radius: 9px;
+
+    background: transparent;
+    color: var(--mg-accent);
+
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background .15s ease;
+}
+
+.mg-noti-mark-all:hover {
+    background: var(--mg-accent-soft);
+}
+
+
+/* ======================================================================
+   Responsive
+   ====================================================================== */
+
+@media (max-width: 480px) {
+
+    .mg-noti-panel {
+        width: calc(100vw - 20px);
+        border-radius: 16px;
+    }
+
+    .mg-noti-list {
+        max-height: 65vh;
+    }
+
+    .mg-noti-item {
+        grid-template-columns: 40px minmax(0, 1fr) 8px;
+        gap: 10px;
+        padding: 14px;
+    }
+
+    .mg-noti-item-icon {
+        width: 38px;
+        height: 38px;
+    }
+}
+
+
+/* ======================================================================
+   Reduced motion
+   ====================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .mg-noti-panel,
+    .mg-noti-panel.is-closing,
+    .mg-noti-bell.mg-noti-ring .mg-noti-bell-icon,
+    .mg-noti-bell.mg-noti-ring .mg-noti-badge {
+        animation: none;
+    }
+}
